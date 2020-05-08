@@ -9,7 +9,7 @@ resources:
 - ../operator
 images:
 - name: operator
-  newName: smartive/hosted-database-operator
-  newTag: 1.0.1
+  newName: public-docker-image-path
+  newTag: latest
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
