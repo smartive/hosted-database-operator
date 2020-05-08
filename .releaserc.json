@@ -1,0 +1,39 @@
+{
+  "verifyConditions": ["@semantic-release/github"],
+  "addChannel": ["@semantic-release/github"],
+  "prepare": [
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./build.sh --no-logo --target Compile --configuration Release"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "cd config/install && kustomize edit set image operator=smartive/hosted-database-operator:${nextRelease.version} && cd ../.."
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "docker build -t smartive/hosted-database-operator ."
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["config/**/*"]
+      }
+    ]
+  ],
+  "publish": [
+    ["@semantic-release/github"],
+    [
+      "semantic-release-docker",
+      {
+        "name": "smartive/hosted-database-operator"
+      }
+    ]
+  ]
+}
