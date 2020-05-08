@@ -21,6 +21,12 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "docker tag smartive/hosted-database-operator:latest smartive/hosted-database-operator:${nextRelease.version}"
+      }
+    ],
+    [
       "@semantic-release/git",
       {
         "assets": ["config/**/*"]
@@ -28,12 +34,18 @@
     ]
   ],
   "publish": [
-    ["@semantic-release/github"],
     [
-      "semantic-release-docker",
+      "@semantic-release/exec",
       {
-        "name": "smartive/hosted-database-operator"
+        "prepareCmd": "docker push smartive/hosted-database-operator:latest"
       }
-    ]
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "docker push smartive/hosted-database-operator:${nextRelease.version}"
+      }
+    ],
+    ["@semantic-release/github"]
   ]
 }

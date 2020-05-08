@@ -30,14 +30,17 @@ jobs:
       - name: Setup Kustomize
         shell: bash
         run: curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+      - name: Setup Docker
+        shell: bash
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
         with:
           extra_plugins: |
             @semantic-release/exec
             @semantic-release/git
-            semantic-release-docker
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
