@@ -37,13 +37,13 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "docker push smartive/hosted-database-operator:latest"
+        "publishCmd": "docker push smartive/hosted-database-operator:latest"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "docker push smartive/hosted-database-operator:${nextRelease.version}"
+        "publishCmd": "docker push smartive/hosted-database-operator:${nextRelease.version}"
       }
     ],
     ["@semantic-release/github"]
