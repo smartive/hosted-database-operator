@@ -1,0 +1,46 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: hosteddatabases.hdo.smartive.ch
+spec:
+  group: hdo.smartive.ch
+  names:
+    kind: HostedDatabase
+    listKind: HostedDatabaseList
+    plural: hosteddatabases
+    singular: hosteddatabase
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          status:
+            properties:
+              dbName:
+                type: string
+              dbHost:
+                type: string
+              configMapName:
+                type: string
+              secretName:
+                type: string
+              error:
+                type: string
+            type: object
+          spec:
+            properties:
+              host:
+                type: string
+            type: object
+          metadata:
+            type: object
+          apiVersion:
+            type: string
+          kind:
+            type: string
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,54 @@
+using System.Collections.Generic;
+using System.Linq;
+using Nuke.Common;
+using Nuke.Common.Execution;
+using Nuke.Common.IO;
+using Nuke.Common.ProjectModel;
+using Nuke.Common.Tools.DotNet;
+using static Nuke.Common.IO.FileSystemTasks;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
+
+[CheckBuildProjectConfigurations]
+[UnsetVisualStudioEnvironmentVariables]
+class Build : NukeBuild
+{
+    public static int Main() => Execute<Build>(x => x.Compile);
+
+    [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
+    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+
+    [Solution] readonly Solution Solution;
+
+    AbsolutePath SourceDirectory => RootDirectory / "src";
+    AbsolutePath TestsDirectory => RootDirectory / "tests";
+    AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+
+    IEnumerable<Project> Projects => Solution.AllProjects.Where(p => p.SolutionFolder?.Name == "src");
+
+    Target Clean => _ => _
+        .Before(Restore)
+        .Executes(() =>
+        {
+            DotNetClean(s => s.SetProject(Solution));
+            EnsureCleanDirectory(ArtifactsDirectory);
+        });
+
+    Target Restore => _ => _
+        .Executes(() => DotNetRestore(_ => _
+            .SetProjectFile(Solution)));
+
+    Target Compile => _ => _
+        .DependsOn(Restore)
+        .Executes(() => DotNetBuild(_ => _
+            .SetProjectFile(Solution)
+            .SetConfiguration(Configuration)
+            .EnableNoRestore()));
+
+    Target Test => _ => _
+        .DependsOn(Clean, Compile)
+        .Executes(() => DotNetTest(s => s
+            .SetProjectFile(Solution)
+            .SetConfiguration(Configuration)
+            .SetProperty("CollectCoverage", true)
+            .EnableNoBuild()));
+}

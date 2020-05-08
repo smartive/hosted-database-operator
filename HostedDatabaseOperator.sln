@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D92BD117-EF81-4401-932B-FA6337DEBFEE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1CB46F8A-6F4A-4AA2-9C55-711F946B7ECC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{936F2A74-239F-4F21-AAF3-D0AACD7BC8C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{006D2ABF-8D6F-48D0-B64E-82EFB81F780F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostedDatabaseOperator", "src\HostedDatabaseOperator\HostedDatabaseOperator.csproj", "{CD70A356-5C18-4817-826F-6828CAAAAF04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostedDatabaseOperator.Test", "tests\HostedDatabaseOperator.Test\HostedDatabaseOperator.Test.csproj", "{8721CAD4-D00D-4AAD-A946-EA19FECA9393}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{006D2ABF-8D6F-48D0-B64E-82EFB81F780F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{006D2ABF-8D6F-48D0-B64E-82EFB81F780F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD70A356-5C18-4817-826F-6828CAAAAF04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD70A356-5C18-4817-826F-6828CAAAAF04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD70A356-5C18-4817-826F-6828CAAAAF04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD70A356-5C18-4817-826F-6828CAAAAF04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8721CAD4-D00D-4AAD-A946-EA19FECA9393}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8721CAD4-D00D-4AAD-A946-EA19FECA9393}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8721CAD4-D00D-4AAD-A946-EA19FECA9393}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8721CAD4-D00D-4AAD-A946-EA19FECA9393}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{006D2ABF-8D6F-48D0-B64E-82EFB81F780F} = {936F2A74-239F-4F21-AAF3-D0AACD7BC8C6}
+		{CD70A356-5C18-4817-826F-6828CAAAAF04} = {D92BD117-EF81-4401-932B-FA6337DEBFEE}
+		{8721CAD4-D00D-4AAD-A946-EA19FECA9393} = {1CB46F8A-6F4A-4AA2-9C55-711F946B7ECC}
+	EndGlobalSection
+EndGlobal
