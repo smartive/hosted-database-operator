@@ -16,22 +16,38 @@ spec:
     openAPIV3Schema:
       properties:
         status:
+          description: Status of the hosted database.
           properties:
             dbName:
+              description: Name that is used on the host.
+              nullable: true
               type: string
             dbHost:
+              description: Host name of the database.
+              nullable: true
               type: string
             configMapName:
+              description: Name of the config map that contains the host / port / name.
+              nullable: true
               type: string
             secretName:
+              description: Name of the secret in the namespace that contains username / password.
+              nullable: true
               type: string
             error:
+              description: Any error that might occur.
+              nullable: true
               type: string
+          required: []
           type: object
         spec:
+          description: Describes the hosted database specification.
           properties:
             host:
+              description: The name of the host to be used.
               type: string
+          required:
+          - host
           type: object
         metadata:
           type: object
@@ -39,6 +55,7 @@ spec:
           type: string
         kind:
           type: string
+      required: []
       type: object
   version: v1
   versions:

@@ -14,7 +14,6 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
-      description: ClusterDatabaseHost is the Schema for the clusterdatabasehosts API
       properties:
         status:
           description: Status information about the cluster database.
@@ -29,7 +28,9 @@ spec:
               type: string
             error:
               description: If given, the error message for the connection attempt.
+              nullable: true
               type: string
+          required: []
           type: object
         spec:
           description: Configuration for a cluster database host.
@@ -59,6 +60,14 @@ spec:
             passwordKey:
               description: The name of the secret data key that contains the password for the connection.
               type: string
+          required:
+          - type
+          - host
+          - port
+          - secretName
+          - secretNamespace
+          - usernameKey
+          - passwordKey
           type: object
         metadata:
           type: object
@@ -66,6 +75,7 @@ spec:
           type: string
         kind:
           type: string
+      required: []
       type: object
   version: v1
   versions:
