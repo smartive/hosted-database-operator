@@ -4,7 +4,7 @@ using HostedDatabaseOperator.Database;
 using HostedDatabaseOperator.Entities;
 using k8s.Models;
 using KubeOps.Operator.Controller;
-using KubeOps.Operator.KubernetesEntities;
+using KubeOps.Operator.Entities.Extensions;
 using KubeOps.Operator.Rbac;
 using Microsoft.Extensions.Logging;
 
@@ -15,11 +15,14 @@ namespace HostedDatabaseOperator.Controller
     public class ClusterDatabaseHostController : ResourceControllerBase<ClusterDatabaseHost>
     {
         private readonly ILogger<ClusterDatabaseHostController> _logger;
+        private readonly ConnectionsManager _connectionsManager;
 
         public ClusterDatabaseHostController(
-            ILogger<ClusterDatabaseHostController> logger)
+            ILogger<ClusterDatabaseHostController> logger,
+            ConnectionsManager connectionsManager)
         {
             _logger = logger;
+            _connectionsManager = connectionsManager;
         }
 
         protected override async Task<TimeSpan?> Created(ClusterDatabaseHost resource)
@@ -51,7 +54,7 @@ namespace HostedDatabaseOperator.Controller
             _logger.LogInformation(
                 @"Cluster database host ""{name}"" was deleted. Remove the configuration.",
                 resource.Metadata.Name);
-            ConnectionsManager.Remove(resource.Metadata.Name);
+            _connectionsManager.Remove(resource.Metadata.Name);
             return Task.CompletedTask;
         }
 
@@ -71,7 +74,7 @@ namespace HostedDatabaseOperator.Controller
             var user = secret.ReadData(spec.UsernameKey);
             var pass = secret.ReadData(spec.PasswordKey);
 
-            ConnectionsManager.Add(
+            _connectionsManager.Add(
                 resource.Metadata.Name,
                 new ConnectionConfig
                 {
@@ -91,7 +94,7 @@ namespace HostedDatabaseOperator.Controller
                 @"Cluster database host ""{name}"" connection check.",
                 resource.Metadata.Name);
             resource.Status.LastConnectionTest = DateTime.UtcNow;
-            await using var host = ConnectionsManager.GetHost(resource.Metadata.Name);
+            await using var host = _connectionsManager.GetHost(resource.Metadata.Name);
             try
             {
                 await host.CanConnect();

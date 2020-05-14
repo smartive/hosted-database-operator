@@ -11,16 +11,18 @@ namespace HostedDatabaseOperator.Finalizer
     public class HostedDatabaseFinalizer : ResourceFinalizerBase<HostedDatabase>
     {
         private readonly ILogger<HostedDatabaseFinalizer> _logger;
+        private readonly ConnectionsManager _connectionsManager;
 
-        public HostedDatabaseFinalizer(ILogger<HostedDatabaseFinalizer> logger)
+        public HostedDatabaseFinalizer(ILogger<HostedDatabaseFinalizer> logger, ConnectionsManager connectionsManager)
         {
             _logger = logger;
+            _connectionsManager = connectionsManager;
         }
 
         public override async Task Finalize(HostedDatabase resource)
         {
             // TODO create a soft-delete for database
-            await using var host = ConnectionsManager.GetHost(resource.Spec.Host);
+            await using var host = _connectionsManager.GetHost(resource.Spec.Host);
 
             _logger.LogDebug(
                 @"Delete and cleanup database ""{database}"".",

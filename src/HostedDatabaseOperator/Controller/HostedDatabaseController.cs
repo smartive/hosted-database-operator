@@ -7,8 +7,7 @@ using HostedDatabaseOperator.Entities;
 using HostedDatabaseOperator.Finalizer;
 using k8s.Models;
 using KubeOps.Operator.Controller;
-using KubeOps.Operator.Entities;
-using KubeOps.Operator.KubernetesEntities;
+using KubeOps.Operator.Entities.Extensions;
 using KubeOps.Operator.Rbac;
 using Microsoft.Extensions.Logging;
 
@@ -22,10 +21,12 @@ namespace HostedDatabaseOperator.Controller
     public class HostedDatabaseController : ResourceControllerBase<HostedDatabase>
     {
         private readonly ILogger<HostedDatabaseController> _logger;
+        private readonly ConnectionsManager _connectionsManager;
 
-        public HostedDatabaseController(ILogger<HostedDatabaseController> logger)
+        public HostedDatabaseController(ILogger<HostedDatabaseController> logger, ConnectionsManager connectionsManager)
         {
             _logger = logger;
+            _connectionsManager = connectionsManager;
         }
 
         protected override async Task<TimeSpan?> Created(HostedDatabase resource)
@@ -42,7 +43,7 @@ namespace HostedDatabaseOperator.Controller
         {
             try
             {
-                await using var host = ConnectionsManager.GetHost(resource.Spec.Host);
+                await using var host = _connectionsManager.GetHost(resource.Spec.Host);
                 var @namespace = resource.Metadata.NamespaceProperty;
                 var secretName = $"{resource.Metadata.Name}-auth";
                 var configMapName = $"{resource.Metadata.Name}-config";
@@ -53,7 +54,7 @@ namespace HostedDatabaseOperator.Controller
                     configMap = new V1ConfigMap(
                         V1ConfigMap.KubeApiVersion,
                         kind: V1ConfigMap.KubeKind,
-                        metadata: new V1ObjectMeta { Name = configMapName, NamespaceProperty = @namespace });
+                        metadata: new V1ObjectMeta {Name = configMapName, NamespaceProperty = @namespace});
 
                     configMap.Data = new Dictionary<string, string>
                     {
@@ -99,7 +100,7 @@ namespace HostedDatabaseOperator.Controller
                     secret = new V1Secret(
                         V1Secret.KubeApiVersion,
                         kind: V1Secret.KubeKind,
-                        metadata: new V1ObjectMeta { Name = secretName, NamespaceProperty = @namespace });
+                        metadata: new V1ObjectMeta {Name = secretName, NamespaceProperty = @namespace});
 
                     secret.Data = new Dictionary<string, byte[]>
                     {
