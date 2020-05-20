@@ -30,7 +30,6 @@ spec:
               description: If given, the error message for the connection attempt.
               nullable: true
               type: string
-          required: []
           type: object
         spec:
           description: Configuration for a cluster database host.
@@ -75,7 +74,6 @@ spec:
           type: string
         kind:
           type: string
-      required: []
       type: object
   version: v1
   versions:

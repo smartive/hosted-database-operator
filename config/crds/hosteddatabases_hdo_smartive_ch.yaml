@@ -38,7 +38,6 @@ spec:
               description: Any error that might occur.
               nullable: true
               type: string
-          required: []
           type: object
         spec:
           description: Describes the hosted database specification.
@@ -55,7 +54,6 @@ spec:
           type: string
         kind:
           type: string
-      required: []
       type: object
   version: v1
   versions:
