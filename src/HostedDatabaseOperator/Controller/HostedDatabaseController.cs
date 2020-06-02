@@ -49,12 +49,22 @@ namespace HostedDatabaseOperator.Controller
                 var configMapName = $"{resource.Metadata.Name}-config";
 
                 var configMap = await Client.Get<V1ConfigMap>(configMapName, @namespace);
+
                 if (configMap == null)
                 {
                     configMap = new V1ConfigMap(
                         V1ConfigMap.KubeApiVersion,
                         kind: V1ConfigMap.KubeKind,
-                        metadata: new V1ObjectMeta {Name = configMapName, NamespaceProperty = @namespace});
+                        metadata: new V1ObjectMeta
+                        {
+                            Name = configMapName,
+                            NamespaceProperty = @namespace,
+                            OwnerReferences = new List<V1OwnerReference>
+                            {
+                                new V1OwnerReference(resource.ApiVersion, resource.Kind, resource.Metadata.Name,
+                                    resource.Metadata.Uid, false, true),
+                            }
+                        });
 
                     configMap.Data = new Dictionary<string, string>
                     {
@@ -100,7 +110,16 @@ namespace HostedDatabaseOperator.Controller
                     secret = new V1Secret(
                         V1Secret.KubeApiVersion,
                         kind: V1Secret.KubeKind,
-                        metadata: new V1ObjectMeta {Name = secretName, NamespaceProperty = @namespace});
+                        metadata: new V1ObjectMeta
+                        {
+                            Name = secretName,
+                            NamespaceProperty = @namespace,
+                            OwnerReferences = new List<V1OwnerReference>
+                            {
+                                new V1OwnerReference(resource.ApiVersion, resource.Kind, resource.Metadata.Name,
+                                    resource.Metadata.Uid, false, true),
+                            }
+                        });
 
                     secret.Data = new Dictionary<string, byte[]>
                     {
