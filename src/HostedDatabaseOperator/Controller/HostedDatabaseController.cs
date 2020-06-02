@@ -17,7 +17,7 @@ namespace HostedDatabaseOperator.Controller
     [EntityRbac(
         typeof(V1Secret),
         typeof(V1ConfigMap),
-        Verbs = RbacVerb.Get | RbacVerb.Create | RbacVerb.Update | RbacVerb.Delete)]
+        Verbs = RbacVerb.Get | RbacVerb.List | RbacVerb.Create | RbacVerb.Update | RbacVerb.Delete)]
     public class HostedDatabaseController : ResourceControllerBase<HostedDatabase>
     {
         private readonly ILogger<HostedDatabaseController> _logger;
