@@ -195,6 +195,10 @@ namespace HostedDatabaseOperator.Database
                 $"GRANT ALL ON SCHEMA {database} TO {username};",
                 _connection);
             await schema.ExecuteNonQueryAsync();
+            await using var usage = new NpgsqlCommand(
+                $"GRANT USAGE ON DATABASE postgres TO {username};",
+                _connection);
+            await usage.ExecuteNonQueryAsync();
         }
 
         public ValueTask DisposeAsync() => _connection.DisposeAsync();
