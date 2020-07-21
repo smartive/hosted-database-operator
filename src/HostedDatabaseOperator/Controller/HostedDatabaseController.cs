@@ -86,27 +86,12 @@ namespace HostedDatabaseOperator.Controller
                         resource.Metadata.Name);
                 }
 
-                var db = configMap.Data["database"];
-                resource.Status.DbHost = $"{host.Config.Host}:{host.Config.Port}";
-                resource.Status.DbName ??= db;
-                resource.Status.SecretName ??= secretName;
-                resource.Status.ConfigMapName ??= configMapName;
-
-                if (!await host.DatabaseExists(db))
-                {
-                    _logger.LogInformation(
-                        @"Hosted Database ""{name}"" did not exist. Create Database.",
-                        resource.Metadata.Name);
-                    await host.CreateDatabase(db);
-                }
-
                 var secret = await Client.Get<V1Secret>(secretName, @namespace);
                 if (secret == null)
                 {
                     _logger.LogDebug(
                         @"Secret ""{name}"" did not exist. Create Secret and User.",
                         secretName);
-                    await host.ClearDatabaseUsers(db);
                     secret = new V1Secret(
                         V1Secret.KubeApiVersion,
                         kind: V1Secret.KubeKind,
@@ -135,25 +120,24 @@ namespace HostedDatabaseOperator.Controller
                     secret = await Client.Create(secret);
                 }
 
+                var db = configMap.Data["database"];
+                resource.Status.DbHost = $"{host.Config.Host}:{host.Config.Port}";
+                resource.Status.DbName ??= db;
+                resource.Status.SecretName ??= secretName;
+                resource.Status.ConfigMapName ??= configMapName;
+
                 var user = secret.ReadData("username");
-                if (!await host.UserExists(user))
+
+                var password = await host.ProcessDatabase(db, user);
+
+                if (password != null)
                 {
                     _logger.LogInformation(
-                        @"User ""{user}"" for database ""{database}"" did not exist. Create User.",
+                        @"User ""{user}"" for database ""{database}"" updated password.",
                         user,
                         resource.Metadata.Name);
-                    var password = await host.CreateUser(user);
                     secret.WriteData("password", password);
                     await Client.Update(secret);
-                }
-
-                if (!await host.UserHasAccess(user, db))
-                {
-                    _logger.LogInformation(
-                        @"User ""{user}"" for database ""{database}"" has no access. Attach user to database.",
-                        user,
-                        resource.Metadata.Name);
-                    await host.AttachUserToDatabase(user, db);
                 }
 
                 resource.Status.Error = null;

@@ -1,0 +1,22 @@
+﻿apiVersion: v1
+stringData:
+  user: postgres
+  pass: pass
+kind: Secret
+metadata:
+  name: test-pgsql-host-auth
+  namespace: default
+type: Opaque
+---
+apiVersion: hdo.smartive.ch/v1
+kind: ClusterDatabaseHost
+metadata:
+  name: test-postgres-host
+spec:
+  host: localhost
+  passwordKey: pass
+  port: 5432
+  secretName: test-pgsql-host-auth
+  secretNamespace: default
+  type: Postgres
+  usernameKey: user

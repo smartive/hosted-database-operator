@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace HostedDatabaseOperator.Database
 {
     public class PostgresDatabaseHost : IDatabaseHost
     {
+        private readonly ILogger _logger;
         private const int DatabaseNameMaxLength = 63;
         private const int UsernameMaxLength = 63;
 
@@ -18,8 +18,9 @@ namespace HostedDatabaseOperator.Database
 
         private readonly NpgsqlConnection _connection;
 
-        public PostgresDatabaseHost(ConnectionConfig config)
+        public PostgresDatabaseHost(ILogger logger, ConnectionConfig config)
         {
+            _logger = logger;
             Config = config;
             var connStr =
                 $"Host={config.Host};Port={config.Port};Username={config.Username};Password={config.Password};";
@@ -54,87 +55,77 @@ namespace HostedDatabaseOperator.Database
                 : str;
         }
 
-        public async Task<bool> DatabaseExists(string name)
+        public async Task<string?> ProcessDatabase(string dbName, string userName)
         {
             if (_connection.State != ConnectionState.Open)
             {
                 await _connection.OpenAsync();
             }
 
-            await using var cmd = new NpgsqlCommand(
-                $"select 1 from information_schema.schemata where schema_name = '{name}';",
+            string? result = null;
+
+            /*
+             * Steps:
+             *     1. Check if the user exists
+             *         1.a if not: create it
+             *     2. Check if the database exists.
+             *         2.a if not: create it and set owner to user
+             */
+
+            if (!await UserExists(userName))
+            {
+                _logger.LogInformation(
+                    @"User did not exist, create user ""{user}"".",
+                    userName);
+                result = await CreateUser(userName);
+            }
+
+            if (!await DatabaseExists(dbName))
+            {
+                _logger.LogInformation(
+                    @"Hosted Database ""{name}"" did not exist. Create Database.",
+                    dbName);
+                await CreateDatabase(dbName, userName);
+            }
+
+            return result;
+        }
+
+        public async Task Teardown(string dbName)
+        {
+            if (_connection.State != ConnectionState.Open)
+            {
+                await _connection.OpenAsync();
+            }
+
+            await using var owner = new NpgsqlCommand(
+                $@"SELECT d.datname as ""Name"",
+                   pg_catalog.pg_get_userbyid(d.datdba) as ""Owner""
+                   FROM pg_catalog.pg_database d
+                   WHERE d.datname = '{dbName}';",
                 _connection);
-            var result = await cmd.ExecuteScalarAsync();
+            await using var ownerReader = await owner.ExecuteReaderAsync();
+            await ownerReader.ReadAsync(); // Only one user can be owner.
+            var user = ownerReader["Owner"]?.ToString() ?? string.Empty;
+            await ownerReader.CloseAsync();
 
-            return result != null;
-        }
-
-        public async Task CreateDatabase(string name)
-        {
-            if (_connection.State != ConnectionState.Open)
-            {
-                await _connection.OpenAsync();
-            }
-
-            await using var cmd = new NpgsqlCommand($"create schema {name};", _connection);
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public async Task ClearDatabaseUsers(string name)
-        {
-            if (_connection.State != ConnectionState.Open)
-            {
-                await _connection.OpenAsync();
-            }
-
-            await using var cmd = new NpgsqlCommand(
-                $@"
-                SELECT usename FROM pg_catalog.pg_user where
-                pg_catalog.has_schema_privilege(usename, '{name}', 'USAGE')
-                and usename != 'postgres';",
+            await using var dropOwned = new NpgsqlCommand(
+                $"drop owned by {user};",
                 _connection);
-            await using var userReader = await cmd.ExecuteReaderAsync();
-
-            var users = new List<string>();
-            while (await userReader.ReadAsync())
-            {
-                users.Add(userReader["usename"]?.ToString() ?? string.Empty);
-            }
-
-            await userReader.CloseAsync();
-
-            if (users.Count <= 0)
-            {
-                return;
-            }
-
-            foreach (var usr in users)
-            {
-                await using var owned = new NpgsqlCommand(
-                    $"drop owned by {usr};",
-                    _connection);
-                await owned.ExecuteNonQueryAsync();
-                await using var user = new NpgsqlCommand(
-                    $"drop user {usr};",
-                    _connection);
-                await user.ExecuteNonQueryAsync();
-            }
-        }
-
-        public async Task DeleteDatabase(string name)
-        {
-            if (_connection.State != ConnectionState.Open)
-            {
-                await _connection.OpenAsync();
-            }
-
-            await using var deleteDb = new NpgsqlCommand(
-                $"DROP SCHEMA IF EXISTS {name} CASCADE;",
+            await dropOwned.ExecuteNonQueryAsync();
+            await using var dropDb = new NpgsqlCommand(
+                $"drop database {dbName};",
                 _connection);
-            await deleteDb.ExecuteNonQueryAsync();
+            await dropDb.ExecuteNonQueryAsync();
+            await using var dropUser = new NpgsqlCommand(
+                $"drop user {user};",
+                _connection);
+            await dropUser.ExecuteNonQueryAsync();
         }
 
-        public async Task<bool> UserExists(string name)
+        public ValueTask DisposeAsync() => _connection.DisposeAsync();
+
+        private async Task<bool> UserExists(string name)
         {
             if (_connection.State != ConnectionState.Open)
             {
@@ -149,23 +140,23 @@ namespace HostedDatabaseOperator.Database
             return result != null;
         }
 
-        public async Task<string> CreateUser(string name)
+        private async Task<string> CreateUser(string name)
         {
             if (_connection.State != ConnectionState.Open)
             {
                 await _connection.OpenAsync();
             }
 
-            var password = GetRandomPassword();
+            var password = this.GenerateRandomPassword();
             await using var cmd = new NpgsqlCommand(
-                $"CREATE USER {name} WITH PASSWORD '{password}';",
+                $"CREATE USER {name} WITH ENCRYPTED PASSWORD '{password}';",
                 _connection);
             await cmd.ExecuteNonQueryAsync();
 
             return password;
         }
 
-        public async Task<bool> UserHasAccess(string name, string database)
+        private async Task<bool> DatabaseExists(string name)
         {
             if (_connection.State != ConnectionState.Open)
             {
@@ -173,47 +164,138 @@ namespace HostedDatabaseOperator.Database
             }
 
             await using var cmd = new NpgsqlCommand(
-                $"select pg_catalog.has_schema_privilege('{name}', '{database}', 'USAGE')",
+                $"select 1 from pg_catalog.pg_database where datname ='{name}';",
                 _connection);
             var result = await cmd.ExecuteScalarAsync();
 
-            return result is bool access && access;
+            return result != null;
         }
 
-        public async Task AttachUserToDatabase(string username, string database)
+        private async Task CreateDatabase(string dbName, string userName)
         {
             if (_connection.State != ConnectionState.Open)
             {
                 await _connection.OpenAsync();
             }
 
-            await using var db = new NpgsqlCommand(
-                $"GRANT CONNECT ON DATABASE postgres TO {username};",
-                _connection);
-            await db.ExecuteNonQueryAsync();
-            await using var schema = new NpgsqlCommand(
-                $"GRANT ALL ON SCHEMA {database} TO {username};",
-                _connection);
-            await schema.ExecuteNonQueryAsync();
+            await using var dbCmd = new NpgsqlCommand($"create database {dbName} owner {userName};", _connection);
+            await dbCmd.ExecuteNonQueryAsync();
+
+            await using var userCmd =
+                new NpgsqlCommand($"grant all privileges on database {dbName} to {userName};", _connection);
+            await userCmd.ExecuteNonQueryAsync();
         }
 
-        public ValueTask DisposeAsync() => _connection.DisposeAsync();
+        //
+        // public async Task ClearDatabaseUsers(string name)
+        // {
+        //     if (_connection.State != ConnectionState.Open)
+        //     {
+        //         await _connection.OpenAsync();
+        //     }
+        //
+        //     await using var cmd = new NpgsqlCommand(
+        //         $@"
+        //         SELECT usename FROM pg_catalog.pg_user where
+        //         pg_catalog.has_schema_privilege(usename, '{name}', 'USAGE')
+        //         and usename != 'postgres';",
+        //         _connection);
+        //     await using var userReader = await cmd.ExecuteReaderAsync();
+        //
+        //     var users = new List<string>();
+        //     while (await userReader.ReadAsync())
+        //     {
+        //         users.Add(userReader["usename"]?.ToString() ?? string.Empty);
+        //     }
+        //
+        //     await userReader.CloseAsync();
+        //
+        //     if (users.Count <= 0)
+        //     {
+        //         return;
+        //     }
+        //
+        //     foreach (var usr in users)
+        //     {
+        // await using var owned = new NpgsqlCommand(
+        //     $"drop owned by {usr};",
+        //     _connection);
+        // await owned.ExecuteNonQueryAsync();
+        // await using var user = new NpgsqlCommand(
+        //     $"drop user {usr};",
+        //     _connection);
+        // await user.ExecuteNonQueryAsync();
+        //     }
+        // }
+        //
+        // public async Task DeleteDatabase(string name)
+        // {
+        //     if (_connection.State != ConnectionState.Open)
+        //     {
+        //         await _connection.OpenAsync();
+        //     }
+        //
+        //     await using var deleteDb = new NpgsqlCommand(
+        //         $"DROP SCHEMA IF EXISTS {name} CASCADE;",
+        //         _connection);
+        //     await deleteDb.ExecuteNonQueryAsync();
+        // }
+        //
 
-        private static string GetRandomPassword()
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-                                 "abcdefghijklmnopqrstuvwxyz" +
-                                 "0123456789";
-            var rnd = new Random(DateTime.Now.Millisecond);
+        //
 
-            var stringBuilder = new StringBuilder();
-            for (var x = 0; x < 16; x++)
-            {
-                var index = rnd.Next(0, chars.Length - 1);
-                stringBuilder.Append(chars[index]);
-            }
-
-            return stringBuilder.ToString();
-        }
+        //
+        // public async Task<bool> UserHasAccess(string name, string database)
+        // {
+        //     if (_connection.State != ConnectionState.Open)
+        //     {
+        //         await _connection.OpenAsync();
+        //     }
+        //
+        //     await using var cmd = new NpgsqlCommand(
+        //         $@"SELECT distinct table_catalog, grantee
+        //            FROM information_schema.table_privileges
+        //            WHERE grantee = '{name}' AND table_catalog = '{database}';",
+        //         _connection);
+        //     var result = await cmd.ExecuteScalarAsync();
+        //
+        //     return result != null;
+        // }
+        //
+        // public async Task AttachUserToDatabase(string username, string database)
+        // {
+        //     if (_connection.State != ConnectionState.Open)
+        //     {
+        //         await _connection.OpenAsync();
+        //     }
+        //
+        //     await using var db = new NpgsqlCommand(
+        //         $"GRANT CONNECT ON DATABASE postgres TO {username};",
+        //         _connection);
+        //     await db.ExecuteNonQueryAsync();
+        //     await using var schema = new NpgsqlCommand(
+        //         $"GRANT ALL ON SCHEMA {database} TO {username};",
+        //         _connection);
+        //     await schema.ExecuteNonQueryAsync();
+        // }
+        //
+        // public ValueTask DisposeAsync() => _connection.DisposeAsync();
+        //
+        // private static string GetRandomPassword()
+        // {
+        //     const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+        //                          "abcdefghijklmnopqrstuvwxyz" +
+        //                          "0123456789";
+        //     var rnd = new Random(DateTime.Now.Millisecond);
+        //
+        //     var stringBuilder = new StringBuilder();
+        //     for (var x = 0; x < 16; x++)
+        //     {
+        //         var index = rnd.Next(0, chars.Length - 1);
+        //         stringBuilder.Append(chars[index]);
+        //     }
+        //
+        //     return stringBuilder.ToString();
+        // }
     }
 }

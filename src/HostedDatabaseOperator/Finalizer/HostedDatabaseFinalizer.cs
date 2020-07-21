@@ -43,19 +43,9 @@ namespace HostedDatabaseOperator.Finalizer
                 new EqualsSelector("managed-by", "hosted-database-operator"),
                 new EqualsSelector("database-instance", db));
 
-            await host.ClearDatabaseUsers(db);
-            _logger.LogDebug(
-                @"Deleted users on database ""{database}"".",
-                resource.Metadata.Name);
-            await host.DeleteDatabase(db);
-            _logger.LogDebug(
-                @"Deleted database ""{database}"".",
-                resource.Metadata.Name);
+            await host.Teardown(db);
             await Client.Delete(configs);
             await Client.Delete(secrets);
-            _logger.LogDebug(
-                @"Deleted config maps and secrets for database ""{database}"".",
-                resource.Metadata.Name);
             _logger.LogInformation(
                 @"Finalize for database ""{database}"" executed. Removed database, user, config and secrets.",
                 resource.Metadata.Name);

@@ -1,0 +1,22 @@
+﻿apiVersion: v1
+stringData:
+  user: root
+  pass: pass
+kind: Secret
+metadata:
+  name: test-mysql-host-auth
+  namespace: default
+type: Opaque
+---
+apiVersion: hdo.smartive.ch/v1
+kind: ClusterDatabaseHost
+metadata:
+  name: test-mysql-host
+spec:
+  host: localhost
+  passwordKey: pass
+  port: 3306
+  secretName: test-mysql-host-auth
+  secretNamespace: default
+  type: MySql
+  usernameKey: user

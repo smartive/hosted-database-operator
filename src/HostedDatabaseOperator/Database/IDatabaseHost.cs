@@ -13,20 +13,24 @@ namespace HostedDatabaseOperator.Database
 
         string FormatUsername(string name);
 
-        Task<bool> DatabaseExists(string name);
+        Task<string?> ProcessDatabase(string dbName, string userName);
 
-        Task CreateDatabase(string name);
+        Task Teardown(string dbName);
 
-        Task ClearDatabaseUsers(string name);
-
-        Task DeleteDatabase(string name);
-
-        Task<bool> UserExists(string name);
-
-        Task<string> CreateUser(string name);
-
-        Task<bool> UserHasAccess(string name, string database);
-
-        Task AttachUserToDatabase(string username, string database);
+        // Task<bool> DatabaseExists(string name);
+        //
+        // Task CreateDatabase(string name);
+        //
+        // Task ClearDatabaseUsers(string name);
+        //
+        // Task DeleteDatabase(string name);
+        //
+        // Task<bool> UserExists(string name);
+        //
+        // Task<string> CreateUser(string name);
+        //
+        // Task<bool> UserHasAccess(string name, string database);
+        //
+        // Task AttachUserToDatabase(string username, string database);
     }
 }

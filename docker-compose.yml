@@ -1,0 +1,19 @@
+﻿version: '3.7'
+services:
+  pgsql:
+    container_name: hdo-pgsql-host
+    image: postgres:11.2-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: pass
+  mysql:
+    container_name: hdo-mysql-host
+    image: mysql:5.7.14
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+      MYSQL_DATABASE: foobar
