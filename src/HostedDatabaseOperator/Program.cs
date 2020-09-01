@@ -1,25 +1,19 @@
 ﻿using System.Threading.Tasks;
-using HostedDatabaseOperator.Controller;
-using HostedDatabaseOperator.Database;
-using HostedDatabaseOperator.Entities;
-using HostedDatabaseOperator.Finalizer;
 using KubeOps.Operator;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace HostedDatabaseOperator
 {
     public static class Program
     {
-        public static Task<int> Main(string[] args) => new KubernetesOperator("hosted-database-operator")
-            .ConfigureServices(
-                services =>
+        public static Task<int> Main(string[] args) => CreateHostBuilder(args).Build().RunOperator(args);
+
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    services
-                        .AddSingleton<ConnectionsManager>()
-                        .AddResourceController<ClusterDatabaseHostController, ClusterDatabaseHost>()
-                        .AddResourceController<HostedDatabaseController, HostedDatabase>()
-                        .AddResourceFinalizer<HostedDatabaseFinalizer, HostedDatabase>();
-                })
-            .Run(args);
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }

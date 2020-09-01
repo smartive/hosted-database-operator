@@ -19,7 +19,9 @@ namespace HostedDatabaseOperator.Controller
 
         public ClusterDatabaseHostController(
             ILogger<ClusterDatabaseHostController> logger,
-            ConnectionsManager connectionsManager)
+            ConnectionsManager connectionsManager,
+            IResourceServices<ClusterDatabaseHost> services)
+            : base(services)
         {
             _logger = logger;
             _connectionsManager = connectionsManager;

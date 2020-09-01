@@ -23,7 +23,11 @@ namespace HostedDatabaseOperator.Controller
         private readonly ILogger<HostedDatabaseController> _logger;
         private readonly ConnectionsManager _connectionsManager;
 
-        public HostedDatabaseController(ILogger<HostedDatabaseController> logger, ConnectionsManager connectionsManager)
+        public HostedDatabaseController(
+            ILogger<HostedDatabaseController> logger,
+            ConnectionsManager connectionsManager,
+            IResourceServices<HostedDatabase> services)
+            : base(services)
         {
             _logger = logger;
             _connectionsManager = connectionsManager;
@@ -34,7 +38,7 @@ namespace HostedDatabaseOperator.Controller
             _logger.LogDebug(
                 @"Hosted Database ""{name}"" was created. Check and create Database.",
                 resource.Metadata.Name);
-            await resource.RegisterFinalizer<HostedDatabaseFinalizer, HostedDatabase>();
+            await AttachFinalizer<HostedDatabaseFinalizer>(resource);
             await CheckDatabase(resource);
             return null;
         }

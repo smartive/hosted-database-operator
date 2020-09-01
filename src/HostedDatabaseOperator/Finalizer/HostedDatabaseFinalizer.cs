@@ -2,6 +2,7 @@
 using HostedDatabaseOperator.Database;
 using HostedDatabaseOperator.Entities;
 using k8s.Models;
+using KubeOps.Operator.Client;
 using KubeOps.Operator.Client.LabelSelectors;
 using KubeOps.Operator.Finalizer;
 using Microsoft.Extensions.Logging;
@@ -13,7 +14,11 @@ namespace HostedDatabaseOperator.Finalizer
         private readonly ILogger<HostedDatabaseFinalizer> _logger;
         private readonly ConnectionsManager _connectionsManager;
 
-        public HostedDatabaseFinalizer(ILogger<HostedDatabaseFinalizer> logger, ConnectionsManager connectionsManager)
+        public HostedDatabaseFinalizer(
+            ILogger<HostedDatabaseFinalizer> logger,
+            IKubernetesClient client,
+            ConnectionsManager connectionsManager)
+            : base(logger, client)
         {
             _logger = logger;
             _connectionsManager = connectionsManager;
