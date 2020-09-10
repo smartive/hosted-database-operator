@@ -6,6 +6,7 @@ using k8s.Models;
 using KubeOps.Operator.Controller;
 using KubeOps.Operator.Entities.Extensions;
 using KubeOps.Operator.Rbac;
+using KubeOps.Operator.Services;
 using Microsoft.Extensions.Logging;
 
 namespace HostedDatabaseOperator.Controller

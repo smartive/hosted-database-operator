@@ -75,7 +75,6 @@ spec:
         kind:
           type: string
       type: object
-  version: v1
   versions:
   - name: v1
     served: true
