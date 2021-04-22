@@ -14,7 +14,7 @@
     <ItemGroup>
         <PackageReference Include="KubeOps" Version="2.3.0" />
         <PackageReference Include="MySql.Data" Version="8.0.24" />
-        <PackageReference Include="Npgsql" Version="5.0.3" />
+        <PackageReference Include="Npgsql" Version="5.0.4" />
     </ItemGroup>
 
     <ItemGroup>
