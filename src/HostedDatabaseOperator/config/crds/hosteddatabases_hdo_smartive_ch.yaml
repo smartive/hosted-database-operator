@@ -1,0 +1,65 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: hosteddatabases.hdo.smartive.ch
+spec:
+  group: hdo.smartive.ch
+  names:
+    kind: HostedDatabase
+    listKind: HostedDatabaseList
+    plural: hosteddatabases
+    singular: hosteddatabase
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Name that is used on the host.
+      jsonPath: .status.dbName
+      name: DbName
+      priority: 0
+      type: string
+    name: v2
+    schema:
+      openAPIV3Schema:
+        properties:
+          status:
+            description: Status of the hosted database.
+            properties:
+              dbName:
+                description: Name that is used on the host.
+                nullable: true
+                type: string
+              credentials:
+                description: Reference to the secret that contains the connection credentials.
+                nullable: true
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              error:
+                description: Any error that might occur.
+                nullable: true
+                type: string
+            type: object
+          spec:
+            description: Describes the hosted database specification.
+            properties:
+              host:
+                description: The name of the host to be used.
+                type: string
+              onDelete:
+                description: The action that is performed when a database is deleted. Defaults to 'create dangling database'.
+                enum:
+                - CreateDanglingDatabase
+                - DeleteDatabase
+                - Nothing
+                type: string
+            required:
+            - host
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

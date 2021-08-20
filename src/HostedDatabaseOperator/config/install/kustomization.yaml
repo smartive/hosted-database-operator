@@ -1,0 +1,15 @@
+namespace: hosted-database-operator-system
+namePrefix: hosted-database-operator-
+commonLabels:
+  operator: hosted-database-operator
+resources:
+- ./namespace.yaml
+- ../crds
+- ../rbac
+- ../operator
+images:
+- name: operator
+  newName: public-docker-image-path
+  newTag: latest
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization

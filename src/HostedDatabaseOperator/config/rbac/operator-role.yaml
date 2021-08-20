@@ -1,0 +1,52 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: operator-role
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - '*'
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - clusterdatabasehosts
+  verbs:
+  - get
+  - watch
+  - update
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - clusterdatabasehosts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - danglingdatabases
+  verbs:
+  - '*'
+- apiGroups:
+  - ''
+  - admissionregistration.k8s.io
+  resources:
+  - services
+  - validatingwebhookconfigurations
+  verbs:
+  - create
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ''
+  resources:
+  - services/status
+  verbs:
+  - get
+  - patch
+  - update
