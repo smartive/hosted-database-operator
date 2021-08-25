@@ -1,0 +1,6 @@
+﻿apiVersion: hdo.smartive.ch/v2
+kind: HostedDatabase
+metadata:
+  name: test-mysql-db
+spec:
+  host: test-mysql-host

@@ -2,18 +2,21 @@
 using DotnetKubernetesClient;
 using HostedDatabaseOperator.Entities;
 using k8s.Models;
+using KubeOps.Operator.Rbac;
 using KubeOps.Operator.Webhooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace HostedDatabaseOperator.Webhooks
 {
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Get)]
     public class ClusterDatabaseHostSecretValidator : IValidationWebhook<ClusterDatabaseHost>
     {
         private readonly ILogger<ClusterDatabaseHostSecretValidator> _logger;
         private readonly IKubernetesClient _client;
 
-        public ClusterDatabaseHostSecretValidator(ILogger<ClusterDatabaseHostSecretValidator> logger,
+        public ClusterDatabaseHostSecretValidator(
+            ILogger<ClusterDatabaseHostSecretValidator> logger,
             IKubernetesClient client)
         {
             _logger = logger;
@@ -41,7 +44,8 @@ namespace HostedDatabaseOperator.Webhooks
                     host.Spec.CredentialsSecret.NamespaceProperty);
 
             return secret == null
-                ? ValidationResult.Fail(StatusCodes.Status404NotFound,
+                ? ValidationResult.Fail(
+                    StatusCodes.Status404NotFound,
                     $@"Secret ""{host.Spec.CredentialsSecret.Name}"" in namespace ""{host.Spec.CredentialsSecret.NamespaceProperty}"" not found.")
                 : ValidationResult.Success();
         }

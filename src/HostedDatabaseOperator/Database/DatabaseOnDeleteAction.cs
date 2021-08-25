@@ -4,6 +4,5 @@
     {
         CreateDanglingDatabase,
         DeleteDatabase,
-        Nothing,
     }
 }

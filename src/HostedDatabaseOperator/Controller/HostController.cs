@@ -7,26 +7,34 @@ using k8s.Models;
 using KubeOps.Operator.Controller;
 using KubeOps.Operator.Controller.Results;
 using KubeOps.Operator.Entities.Extensions;
+using KubeOps.Operator.Events;
 using KubeOps.Operator.Rbac;
 using Microsoft.Extensions.Logging;
 
 namespace HostedDatabaseOperator.Controller
 {
-    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.All)]
+    /// <summary>
+    /// Controller for <see cref="ClusterDatabaseHost"/>.
+    /// Manages connections to database hosts.
+    /// </summary>
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Get)]
     public class HostController : IResourceController<ClusterDatabaseHost>
     {
         private readonly ILogger<HostController> _logger;
-        private readonly DatabaseConnectionsPool _pool;
+        private readonly DatabaseConnectionPool _pool;
         private readonly IKubernetesClient _client;
+        private readonly IEventManager.AsyncMessagePublisher _connectionError;
 
         public HostController(
             ILogger<HostController> logger,
-            DatabaseConnectionsPool pool,
-            IKubernetesClient client)
+            DatabaseConnectionPool pool,
+            IKubernetesClient client,
+            IEventManager eventManager)
         {
             _logger = logger;
             _pool = pool;
             _client = client;
+            _connectionError = eventManager.CreatePublisher("error_connection_host", EventType.Warning);
         }
 
         public async Task<ResourceControllerResult?> CreatedAsync(ClusterDatabaseHost entity)
@@ -111,14 +119,11 @@ namespace HostedDatabaseOperator.Controller
             try
             {
                 await using var database = _pool.GetHost(host.Name());
-                await database.CanConnect();
-                host.Status.Connected = true;
-                host.Status.Error = null;
+                host.Status.Connected = await database.CanConnect();
             }
             catch (Exception e)
             {
-                host.Status.Connected = false;
-                host.Status.Error = e.Message;
+                await ConnectionError(host, e.Message);
             }
             finally
             {
@@ -141,7 +146,7 @@ namespace HostedDatabaseOperator.Controller
         {
             host.Status.Connected = false;
             host.Status.LastConnectionCheck = DateTime.UtcNow;
-            host.Status.Error = reason;
+            await _connectionError(host, reason);
             await _client.UpdateStatus(host);
         }
     }

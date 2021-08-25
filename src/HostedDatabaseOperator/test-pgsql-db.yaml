@@ -1,0 +1,6 @@
+﻿apiVersion: hdo.smartive.ch/v2
+kind: HostedDatabase
+metadata:
+  name: test-pgsql-db
+spec:
+  host: test-postgres-host

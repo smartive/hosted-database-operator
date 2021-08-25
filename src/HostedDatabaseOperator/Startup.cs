@@ -10,19 +10,20 @@ namespace HostedDatabaseOperator
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddKubernetesOperator(s =>
-                {
-                    s.Name = "hosted-database-operator";
+                .AddKubernetesOperator(
+                    s =>
+                    {
+                        s.Name = "hosted-database-operator";
 #if DEBUG
-                    s.EnableLeaderElection = false;
+                        s.EnableLeaderElection = false;
 #endif
-                })
+                    })
 #if DEBUG
                 .AddWebhookLocaltunnel()
 #endif
                 ;
 
-            services.AddSingleton<DatabaseConnectionsPool>();
+            services.AddSingleton<DatabaseConnectionPool>();
         }
 
         public void Configure(IApplicationBuilder app)

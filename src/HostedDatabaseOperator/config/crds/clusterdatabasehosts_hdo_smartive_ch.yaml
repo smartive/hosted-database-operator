@@ -12,7 +12,12 @@ spec:
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - description: Determines the state if the host can be connected to.
+    - description: >-
+        Determines the state if the host can be connected to.
+
+        If the connection-check returns an error, an event
+
+        is created with the error message.
       jsonPath: .status.connected
       name: Connected
       priority: 0
@@ -27,26 +32,33 @@ spec:
       openAPIV3Schema:
         properties:
           status:
-            description: Status information about the cluster database.
+            description: Status object for the entity.
             properties:
               connected:
-                description: Determines the state if the host can be connected to.
+                description: >-
+                  Determines the state if the host can be connected to.
+
+                  If the connection-check returns an error, an event
+
+                  is created with the error message.
                 type: boolean
               lastConnectionCheck:
-                description: The timestamp of the last connection check.
+                description: >-
+                  To reduce event creation, the last connection check (timestamp)
+
+                  is stored in this status field.
                 format: date-time
-                nullable: true
-                type: string
-              error:
-                description: If given, the error message for the connection attempt.
                 nullable: true
                 type: string
             type: object
           spec:
-            description: Configuration for a cluster database host.
+            description: Specification of the kubernetes object.
             properties:
               type:
-                description: Determines the type of the database host.
+                description: >-
+                  Determines the type of the database host.
+
+                  Can be one of: "Postgres", "MySql".
                 enum:
                 - MySql
                 - Postgres
@@ -55,11 +67,11 @@ spec:
                 description: The hostname of the database.
                 type: string
               port:
-                description: Port to connect.
+                description: Port of the connection to the database host.
                 format: int32
                 type: integer
               credentialsSecret:
-                description: A reference to a secret that contains a username and a password to connect to this database host.
+                description: A reference to a secret that contains a username and a password to connect to the database host.
                 properties:
                   name:
                     type: string
@@ -67,10 +79,16 @@ spec:
                     type: string
                 type: object
               usernameKey:
-                description: The name of the secret data key that contains the username for the connection (defaults to 'username').
+                description: >-
+                  The name of the secret data key that contains
+
+                  the username for the connection (defaults to "username").
                 type: string
               passwordKey:
-                description: The name of the secret data key that contains the password for the connection (defaults to 'password').
+                description: >-
+                  The name of the secret data key that contains
+
+                  the password for the connection (defaults to "password").
                 type: string
             required:
             - type

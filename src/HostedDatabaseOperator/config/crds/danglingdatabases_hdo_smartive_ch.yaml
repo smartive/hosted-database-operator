@@ -12,14 +12,22 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The name of the host to be used.
-      jsonPath: .spec.host
-      name: Host
+    - description: >-
+        Computed name of the database. This represents the
+
+        name of the database on the host.
+      jsonPath: .spec.originalDatabase.status.dbName
+      name: DbName
       priority: 0
       type: string
-    - description: The name of the database (on the host).
-      jsonPath: .spec.name
-      name: Name
+    - description: >-
+        The name of the host to be used.
+
+        This name must refer to a ClusterDatabaseHost,
+
+        otherwise, the operator cannot create the database.
+      jsonPath: .spec.originalDatabase.spec.host
+      name: Host
       priority: 0
       type: string
     name: v2
@@ -27,26 +35,18 @@ spec:
       openAPIV3Schema:
         properties:
           spec:
-            description: Describes the dangling database specification.
+            description: Specification of the kubernetes object.
             properties:
-              host:
-                description: The name of the host to be used.
-                type: string
-              name:
-                description: The name of the database (on the host).
-                type: string
-              credentialsSecret:
-                description: A reference to the secret that contains the credentials for the dangling database.
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
+              originalDatabase:
+                description: >-
+                  A HostedDatabase object. This is the object that
+
+                  originally created the dangling database.
                 type: object
+                x-kubernetes-embedded-resource: true
+                x-kubernetes-preserve-unknown-fields: true
             required:
-            - host
-            - name
-            - credentialsSecret
+            - originalDatabase
             type: object
         type: object
     served: true

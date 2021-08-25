@@ -8,7 +8,55 @@ rules:
   resources:
   - secrets
   verbs:
-  - '*'
+  - get
+  - update
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - get
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - get
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - clusterdatabasehosts
+  verbs:
+  - get
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - clusterdatabasehosts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - clusterdatabasehosts
+  verbs:
+  - get
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - clusterdatabasehosts/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - hdo.smartive.ch
   resources:
