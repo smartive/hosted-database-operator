@@ -62,3 +62,23 @@ the hosted database, the db remains the same. If the dangling database
 is deleted as well, the data is lost.
 
 It works on MySql > 5.7 and PostgreSQL > 9.2 (tested).
+
+## Installation
+
+To install the operator, you may use the Kustomize files in
+`./src/HostedDatabaseOperator/config`. The simplest way is
+to use the `kustomization.yaml` in the `install` subdirectory.
+
+An example file that installs the operator into the
+predefined namespace (`hosted-database-operator-system`)
+would be:
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: hosted-database-operator-system
+
+resources:
+  - github.com/smartive/hosted-database-operator/src/HostedDatabaseOperator/config/install?ref=v2.0.0
+```
