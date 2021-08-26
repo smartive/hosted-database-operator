@@ -18,6 +18,8 @@ namespace HostedDatabaseOperator.Controller
     /// Manages connections to database hosts.
     /// </summary>
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Get)]
+    [EntityRbac(typeof(ClusterDatabaseHost), Verbs = RbacVerb.Watch)]
+    [EntityRbac(typeof(Corev1Event), Verbs = RbacVerb.Create)]
     public class HostController : IResourceController<ClusterDatabaseHost>
     {
         private readonly ILogger<HostController> _logger;

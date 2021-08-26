@@ -5,12 +5,14 @@ using DotnetKubernetesClient.LabelSelectors;
 using HostedDatabaseOperator.Database;
 using HostedDatabaseOperator.Entities;
 using k8s.Models;
+using KubeOps.Operator.Rbac;
 using KubeOps.Operator.Webhooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace HostedDatabaseOperator.Webhooks
 {
+    [EntityRbac(typeof(DanglingDatabase), Verbs = RbacVerb.List)]
     public class DuplicateDatabaseValidator : IValidationWebhook<HostedDatabase>
     {
         private readonly ILogger<DuplicateDatabaseValidator> _logger;

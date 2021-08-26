@@ -31,7 +31,6 @@ namespace HostedDatabaseOperator.Entities
     /// is removed.
     /// </summary>
     [KubernetesEntity(Group = "hdo.smartive.ch", ApiVersion = "v2")]
-    [EntityRbac(typeof(DanglingDatabase), Verbs = RbacVerb.All)]
     public class DanglingDatabase : CustomKubernetesEntity<DanglingDatabaseSpec>
     {
         public DanglingDatabase()

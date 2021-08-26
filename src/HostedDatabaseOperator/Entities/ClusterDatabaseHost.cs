@@ -78,7 +78,6 @@ namespace HostedDatabaseOperator.Entities
     /// </summary>
     [KubernetesEntity(Group = "hdo.smartive.ch", ApiVersion = "v2")]
     [EntityScope(EntityScope.Cluster)]
-    [EntityRbac(typeof(ClusterDatabaseHost), Verbs = RbacVerb.Get | RbacVerb.Watch | RbacVerb.Update)]
     public class ClusterDatabaseHost : CustomKubernetesEntity<ClusterDatabaseHostSpec, ClusterDatabaseHostStatus>
     {
     }

@@ -8,55 +8,31 @@ rules:
   resources:
   - secrets
   verbs:
+  - create
   - get
+  - update
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - danglingdatabases
+  verbs:
+  - create
+  - list
   - update
   - delete
 - apiGroups:
-  - ''
-  resources:
-  - secrets
-  verbs:
-  - get
-- apiGroups:
-  - ''
-  resources:
-  - secrets
-  verbs:
-  - delete
-- apiGroups:
-  - ''
-  resources:
-  - secrets
-  verbs:
-  - get
-- apiGroups:
   - hdo.smartive.ch
   resources:
-  - clusterdatabasehosts
+  - hosteddatabases
   verbs:
-  - get
-- apiGroups:
-  - hdo.smartive.ch
-  resources:
-  - clusterdatabasehosts/status
-  verbs:
-  - get
-  - patch
+  - watch
   - update
 - apiGroups:
-  - hdo.smartive.ch
+  - ''
   resources:
-  - clusterdatabasehosts
+  - events
   verbs:
-  - get
-- apiGroups:
-  - hdo.smartive.ch
-  resources:
-  - clusterdatabasehosts/status
-  verbs:
-  - get
-  - patch
-  - update
+  - create
 - apiGroups:
   - hdo.smartive.ch
   resources:
@@ -64,21 +40,12 @@ rules:
   verbs:
   - get
   - watch
-  - update
 - apiGroups:
-  - hdo.smartive.ch
+  - apps
   resources:
-  - clusterdatabasehosts/status
+  - deployments
   verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - hdo.smartive.ch
-  resources:
-  - danglingdatabases
-  verbs:
-  - '*'
+  - list
 - apiGroups:
   - ''
   - admissionregistration.k8s.io
@@ -87,6 +54,30 @@ rules:
   - validatingwebhookconfigurations
   verbs:
   - create
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - hosteddatabases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hdo.smartive.ch
+  resources:
+  - clusterdatabasehosts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - deployments/status
+  verbs:
   - get
   - patch
   - update

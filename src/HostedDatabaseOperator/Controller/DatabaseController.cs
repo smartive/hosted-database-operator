@@ -19,8 +19,11 @@ using Microsoft.Extensions.Logging;
 
 namespace HostedDatabaseOperator.Controller
 {
-    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Get | RbacVerb.Update | RbacVerb.Delete)]
-    public class DatabaseController : IResourceController<HostedDatabase>, IResourceController<DanglingDatabase>
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Get | RbacVerb.Create | RbacVerb.Update)]
+    [EntityRbac(typeof(DanglingDatabase), Verbs = RbacVerb.List | RbacVerb.Update | RbacVerb.Delete)]
+    [EntityRbac(typeof(HostedDatabase), Verbs = RbacVerb.Update | RbacVerb.Watch)]
+    [EntityRbac(typeof(Corev1Event), Verbs = RbacVerb.Create)]
+    public class DatabaseController : IResourceController<HostedDatabase>
     {
         private readonly ILogger<DatabaseController> _logger;
         private readonly IKubernetesClient _client;

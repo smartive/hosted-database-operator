@@ -8,10 +8,14 @@ using k8s.Models;
 using KubeOps.Operator;
 using KubeOps.Operator.Entities.Extensions;
 using KubeOps.Operator.Finalizer;
+using KubeOps.Operator.Rbac;
 using Microsoft.Extensions.Logging;
 
 namespace HostedDatabaseOperator.Finalizer
 {
+    [EntityRbac(typeof(V1Deployment), Verbs = RbacVerb.List)]
+    [EntityRbac(typeof(DanglingDatabase), Verbs = RbacVerb.Create)]
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Get | RbacVerb.Update)]
     public class SoftDeleteDatabaseFinalizer : IResourceFinalizer<HostedDatabase>
     {
         private readonly ILogger<SoftDeleteDatabaseFinalizer> _logger;

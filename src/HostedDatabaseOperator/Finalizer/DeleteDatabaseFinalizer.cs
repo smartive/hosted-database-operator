@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HostedDatabaseOperator.Finalizer
 {
-    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Delete)]
+    [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Get)]
     public class DeleteDatabaseFinalizer : IResourceFinalizer<HostedDatabase>, IResourceFinalizer<DanglingDatabase>
     {
         private readonly ILogger<DeleteDatabaseFinalizer> _logger;
