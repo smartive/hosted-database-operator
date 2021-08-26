@@ -1,6 +1,4 @@
-﻿using HostedDatabaseOperator.Controller;
 using HostedDatabaseOperator.Database;
-using HostedDatabaseOperator.Finalizer;
 using KubeOps.Operator;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,11 +10,20 @@ namespace HostedDatabaseOperator
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddKubernetesOperator(s => s.Name = "hosted-database-operator")
-                .AddController<ClusterDatabaseHostController>()
-                .AddController<HostedDatabaseController>()
-                .AddFinalizer<HostedDatabaseFinalizer>();
-            services.AddSingleton<ConnectionsManager>();
+                .AddKubernetesOperator(
+                    s =>
+                    {
+                        s.Name = "hosted-database-operator";
+#if DEBUG
+                        s.EnableLeaderElection = false;
+#endif
+                    })
+#if DEBUG
+                .AddWebhookLocaltunnel()
+#endif
+                ;
+
+            services.AddSingleton<DatabaseConnectionPool>();
         }
 
         public void Configure(IApplicationBuilder app)

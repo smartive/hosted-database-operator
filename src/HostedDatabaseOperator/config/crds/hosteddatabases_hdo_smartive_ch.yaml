@@ -1,0 +1,117 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: hosteddatabases.hdo.smartive.ch
+spec:
+  group: hdo.smartive.ch
+  names:
+    kind: HostedDatabase
+    listKind: HostedDatabaseList
+    plural: hosteddatabases
+    singular: hosteddatabase
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: >-
+        Computed name of the database. This represents the
+
+        name of the database on the host.
+      jsonPath: .status.dbName
+      name: DbName
+      priority: 0
+      type: string
+    - description: >-
+        The name of the host to be used.
+
+        This name must refer to a ClusterDatabaseHost,
+
+        otherwise, the operator cannot create the database.
+      jsonPath: .spec.host
+      name: Host
+      priority: 0
+      type: string
+    name: v2
+    schema:
+      openAPIV3Schema:
+        properties:
+          status:
+            description: Status object for the entity.
+            properties:
+              dbName:
+                description: >-
+                  Computed name of the database. This represents the
+
+                  name of the database on the host.
+                nullable: true
+                type: string
+              credentials:
+                description: Reference to the secret that contains the connection credentials.
+                nullable: true
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+            type: object
+          spec:
+            description: Specification of the kubernetes object.
+            properties:
+              host:
+                description: >-
+                  The name of the host to be used.
+
+                  This name must refer to a ClusterDatabaseHost,
+
+                  otherwise, the operator cannot create the database.
+                type: string
+              databaseName:
+                description: >-
+                  If set, overwrites the name of the database to be used.
+
+                  If omitted, the operator defaults to the formatted name
+
+                  of the HostedDatabase.
+                nullable: true
+                type: string
+              username:
+                description: >-
+                  If set, overwrites the name of the user for the database.
+
+                  If omitted, the operator defaults to the formatted name
+
+                  of the HostedDatabase.
+                nullable: true
+                type: string
+              secretName:
+                description: >-
+                  If set, overwrites the name of the secret that stores the
+
+                  connection information for the database. If omitted, the operator
+
+                  defaults to "formatted-db-name" with the suffix "-credentials".
+                nullable: true
+                type: string
+              onDelete:
+                description: >-
+                  The action that is performed when a database is deleted.
+
+                  Defaults to "CreateDanglingDatabase". DeleteDatabase
+
+                  will directly delete the database on the host if the entity
+
+                  is deleted in Kubernetes.
+
+                  Can be one of: "CreateDanglingDatabase", "DeleteDatabase".
+                enum:
+                - CreateDanglingDatabase
+                - DeleteDatabase
+                type: string
+            required:
+            - host
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

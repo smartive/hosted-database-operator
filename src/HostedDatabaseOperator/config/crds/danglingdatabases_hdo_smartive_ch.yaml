@@ -1,0 +1,53 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: danglingdatabases.hdo.smartive.ch
+spec:
+  group: hdo.smartive.ch
+  names:
+    kind: DanglingDatabase
+    listKind: DanglingDatabaseList
+    plural: danglingdatabases
+    singular: danglingdatabase
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: >-
+        Computed name of the database. This represents the
+
+        name of the database on the host.
+      jsonPath: .spec.originalDatabase.status.dbName
+      name: DbName
+      priority: 0
+      type: string
+    - description: >-
+        The name of the host to be used.
+
+        This name must refer to a ClusterDatabaseHost,
+
+        otherwise, the operator cannot create the database.
+      jsonPath: .spec.originalDatabase.spec.host
+      name: Host
+      priority: 0
+      type: string
+    name: v2
+    schema:
+      openAPIV3Schema:
+        properties:
+          spec:
+            description: Specification of the kubernetes object.
+            properties:
+              originalDatabase:
+                description: >-
+                  A HostedDatabase object. This is the object that
+
+                  originally created the dangling database.
+                type: object
+                x-kubernetes-embedded-resource: true
+                x-kubernetes-preserve-unknown-fields: true
+            required:
+            - originalDatabase
+            type: object
+        type: object
+    served: true
+    storage: true
