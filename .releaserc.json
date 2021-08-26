@@ -10,7 +10,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "cd src/HostedDatabaseOperator/config/install && ../../../../kustomize edit set image operator=smartive/hosted-database-operator:${nextRelease.version} && cd ../../../.."
+        "prepareCmd": "cd src/HostedDatabaseOperator/config/install && ../../../../kustomize edit set image operator=ghcr.io/smartive/hosted-database-operator:${nextRelease.version} && cd ../../../.."
       }
     ],
     [
