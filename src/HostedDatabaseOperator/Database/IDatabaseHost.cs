@@ -40,6 +40,8 @@ namespace HostedDatabaseOperator.Database
 
         Task RemoveDatabaseWithUser(string? database, string? username);
 
+        Task<bool> DatabaseExists(string database);
+
         // Task CreateDanglingDatabase(string dbName);
         //
     }

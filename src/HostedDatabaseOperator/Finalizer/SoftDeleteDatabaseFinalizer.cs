@@ -1,7 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DotnetKubernetesClient;
+using DotnetKubernetesClient.LabelSelectors;
 using HostedDatabaseOperator.Entities;
 using k8s.Models;
+using KubeOps.Operator;
 using KubeOps.Operator.Entities.Extensions;
 using KubeOps.Operator.Finalizer;
 using Microsoft.Extensions.Logging;
@@ -13,15 +17,18 @@ namespace HostedDatabaseOperator.Finalizer
         private readonly ILogger<SoftDeleteDatabaseFinalizer> _logger;
         private readonly IKubernetesClient _client;
         private readonly IFinalizerManager<DanglingDatabase> _finalizerManager;
+        private readonly OperatorSettings _settings;
 
         public SoftDeleteDatabaseFinalizer(
             ILogger<SoftDeleteDatabaseFinalizer> logger,
             IKubernetesClient client,
-            IFinalizerManager<DanglingDatabase> finalizerManager)
+            IFinalizerManager<DanglingDatabase> finalizerManager,
+            OperatorSettings settings)
         {
             _logger = logger;
             _client = client;
             _finalizerManager = finalizerManager;
+            _settings = settings;
         }
 
         public async Task FinalizeAsync(HostedDatabase entity)
@@ -31,20 +38,36 @@ namespace HostedDatabaseOperator.Finalizer
              * and don't delete the actual database. Only remove the entity.
              * Further, update the credentials, such that the dangling database is also owner of the credentials.
              */
-
-            var danglingDb = await _client.Create(
-                new DanglingDatabase
+            var danglingDb = new DanglingDatabase
+            {
+                Metadata =
                 {
-                    Metadata =
+                    Name = entity.Name(),
+                    NamespaceProperty = entity.Namespace(),
+                    Labels = new Dictionary<string, string>
                     {
-                        Name = entity.Name(),
-                        NamespaceProperty = entity.Namespace(),
+                        { "managed-by", _settings.Name },
+                        { "hdo.smartive.ch/database-name", entity.Status.DbName ?? throw new("No DB Name set.") },
                     },
-                    Spec =
-                    {
-                        OriginalDatabase = entity,
-                    },
-                });
+                },
+                Spec =
+                {
+                    OriginalDatabase = entity,
+                },
+            };
+
+            var operatorReference = (await _client.List<V1Deployment>(
+                    labelSelectors: new EqualsSelector("operator-deployment", _settings.Name)))
+                .SingleOrDefault()
+                ?.MakeOwnerReference();
+
+            if (operatorReference != null)
+            {
+                operatorReference.Controller = true;
+                danglingDb.AddOwnerReference(operatorReference);
+            }
+
+            danglingDb = await _client.Create(danglingDb);
 
             await _finalizerManager.RegisterFinalizerAsync<DeleteDatabaseFinalizer>(danglingDb);
 

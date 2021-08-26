@@ -121,13 +121,39 @@ namespace HostedDatabaseOperator.Database.Flavors
 
         public async Task RemoveDatabaseWithUser(string? database, string? username)
         {
-            throw new System.NotImplementedException();
+            if (_connection.State != ConnectionState.Open)
+            {
+                await _connection.OpenAsync();
+            }
+
+            if (database != null && await DatabaseExists(database))
+            {
+                _logger.LogInformation(
+                    @"Hosted Database ""{name}"" exists. Delete Database on host ""{host}"".",
+                    database,
+                    ConnectionConfiguration.Host);
+                await DeleteDatabase(database);
+            }
+
+            if (username != null && await UserExists(username))
+            {
+                _logger.LogInformation(
+                    @"User ""{name}"" exists. Delete user on host ""{host}"".",
+                    username,
+                    ConnectionConfiguration.Host);
+                await DeleteUser(username);
+            }
         }
 
         public ValueTask DisposeAsync() => _connection.DisposeAsync();
 
-        private async Task<bool> DatabaseExists(string name)
+        public async Task<bool> DatabaseExists(string name)
         {
+            if (_connection.State != ConnectionState.Open)
+            {
+                await _connection.OpenAsync();
+            }
+
             await using var cmd = new MySqlCommand(
                 $"SELECT 1 FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{name}';",
                 _connection);
@@ -176,6 +202,27 @@ namespace HostedDatabaseOperator.Database.Flavors
                 $"GRANT ALL ON `{database}`.* TO '{username}'@'%';",
                 _connection);
             await cmd.ExecuteNonQueryAsync();
+        }
+
+        private async Task DeleteDatabase(string name)
+        {
+            if (_connection.State != ConnectionState.Open)
+            {
+                await _connection.OpenAsync();
+            }
+
+            await using var deleteDb = new MySqlCommand(
+                $"drop database {name};",
+                _connection);
+            await deleteDb.ExecuteNonQueryAsync();
+        }
+
+        private async Task DeleteUser(string username)
+        {
+            await using var deleteDb = new MySqlCommand(
+                $"drop user '{username}'@'%';",
+                _connection);
+            await deleteDb.ExecuteNonQueryAsync();
         }
     }
 }

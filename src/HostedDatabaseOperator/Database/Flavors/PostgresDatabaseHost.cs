@@ -135,11 +135,15 @@ namespace HostedDatabaseOperator.Database.Flavors
             }
         }
 
-
         public ValueTask DisposeAsync() => _connection.DisposeAsync();
 
-        private async Task<bool> DatabaseExists(string name)
+        public async Task<bool> DatabaseExists(string name)
         {
+            if (_connection.State != ConnectionState.Open)
+            {
+                await _connection.OpenAsync();
+            }
+
             await using var cmd = new NpgsqlCommand(
                 $"select 1 from pg_catalog.pg_database where datname ='{name}';",
                 _connection);
