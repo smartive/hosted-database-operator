@@ -1,8 +1,8 @@
 commonLabels:
   operator-element: crd
 resources:
+- danglingdatabases_hdo_smartive_ch.yaml
 - hosteddatabases_hdo_smartive_ch.yaml
 - clusterdatabasehosts_hdo_smartive_ch.yaml
-- danglingdatabases_hdo_smartive_ch.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

@@ -45,6 +45,7 @@ rules:
   resources:
   - deployments
   verbs:
+  - get
   - list
 - apiGroups:
   - ''
@@ -57,6 +58,12 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - '*'
 - apiGroups:
   - hdo.smartive.ch
   resources:
