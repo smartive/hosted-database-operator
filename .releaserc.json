@@ -1,6 +1,5 @@
 {
-  "verifyConditions": ["@semantic-release/github"],
-  "addChannel": ["@semantic-release/github"],
+  "plugins": ["@semantic-release/commit-analyzer", "@semantic-release/release-notes-generator", "@semantic-release/github"],
   "prepare": [
     [
       "@semantic-release/exec",
@@ -11,13 +10,13 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "cd config/install && ../../kustomize edit set image operator=smartive/hosted-database-operator:${nextRelease.version} && cd ../.."
+        "prepareCmd": "cd src/HostedDatabaseOperator/config/install && ../../../../kustomize edit set image operator=smartive/hosted-database-operator:${nextRelease.version} && cd ../../../.."
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "docker build -t smartive/hosted-database-operator ."
+        "prepareCmd": "docker build -f src/HostedDatabaseOperator/Dockerfile -t smartive/hosted-database-operator ."
       }
     ],
     [
@@ -27,9 +26,21 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "docker tag smartive/hosted-database-operator:latest ghcr.io/smartive/hosted-database-operator:latest"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "docker tag smartive/hosted-database-operator:latest ghcr.io/smartive/hosted-database-operator:${nextRelease.version}"
+      }
+    ],
+    [
       "@semantic-release/git",
       {
-        "assets": ["config/**/*"]
+        "assets": ["src/HostedDatabaseOperator/config/**/*"]
       }
     ]
   ],
@@ -44,6 +55,18 @@
       "@semantic-release/exec",
       {
         "publishCmd": "docker push smartive/hosted-database-operator:${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "docker push ghcr.io/smartive/hosted-database-operator:latest"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "docker push ghcr.io/smartive/hosted-database-operator:${nextRelease.version}"
       }
     ],
     ["@semantic-release/github"]
