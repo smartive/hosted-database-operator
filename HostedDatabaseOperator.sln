@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{936F2A74
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostedDatabaseOperator", "src\HostedDatabaseOperator\HostedDatabaseOperator.csproj", "{146E45B1-2777-4BB1-B194-7A47746F9BB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_build", "build\_build.csproj", "{0BB38909-485F-4079-BA3E-79AE949D7BD0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,8 +20,13 @@ Global
 		{146E45B1-2777-4BB1-B194-7A47746F9BB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{146E45B1-2777-4BB1-B194-7A47746F9BB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{146E45B1-2777-4BB1-B194-7A47746F9BB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BB38909-485F-4079-BA3E-79AE949D7BD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BB38909-485F-4079-BA3E-79AE949D7BD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BB38909-485F-4079-BA3E-79AE949D7BD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BB38909-485F-4079-BA3E-79AE949D7BD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{146E45B1-2777-4BB1-B194-7A47746F9BB6} = {D92BD117-EF81-4401-932B-FA6337DEBFEE}
+		{0BB38909-485F-4079-BA3E-79AE949D7BD0} = {936F2A74-239F-4F21-AAF3-D0AACD7BC8C6}
 	EndGlobalSection
 EndGlobal
