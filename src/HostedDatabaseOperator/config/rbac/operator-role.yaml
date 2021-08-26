@@ -53,11 +53,13 @@ rules:
   resources:
   - services
   - validatingwebhookconfigurations
+  - mutatingwebhookconfigurations
   verbs:
   - create
   - get
   - patch
   - update
+  - delete
 - apiGroups:
   - coordination.k8s.io
   resources:
