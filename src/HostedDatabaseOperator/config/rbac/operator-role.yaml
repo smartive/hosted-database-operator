@@ -33,6 +33,9 @@ rules:
   - events
   verbs:
   - create
+  - get
+  - list
+  - update
 - apiGroups:
   - hdo.smartive.ch
   resources:
