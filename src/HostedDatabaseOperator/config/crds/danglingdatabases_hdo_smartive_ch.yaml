@@ -9,7 +9,7 @@ spec:
     listKind: DanglingDatabaseList
     plural: danglingdatabases
     singular: danglingdatabase
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - description: >-
@@ -35,6 +35,7 @@ spec:
       openAPIV3Schema:
         properties:
           spec:
+            description: Specification of the kubernetes object.
             properties:
               originalDatabase:
                 description: >-

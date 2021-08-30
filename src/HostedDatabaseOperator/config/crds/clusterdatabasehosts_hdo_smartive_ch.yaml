@@ -32,6 +32,7 @@ spec:
       openAPIV3Schema:
         properties:
           status:
+            description: Status object for the entity.
             properties:
               connected:
                 description: >-
@@ -51,6 +52,7 @@ spec:
                 type: string
             type: object
           spec:
+            description: Specification of the kubernetes object.
             properties:
               type:
                 description: >-
@@ -68,6 +70,15 @@ spec:
                 description: Port of the connection to the database host.
                 format: int32
                 type: integer
+              sslMode:
+                description: >-
+                  The SSL mode for the connection. Defaults to Disabled.
+
+                  Can be one of "Disabled" and "Required".
+                enum:
+                - Disabled
+                - Required
+                type: string
               credentialsSecret:
                 description: A reference to a secret that contains a username and a password to connect to the database host.
                 properties:

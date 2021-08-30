@@ -34,6 +34,12 @@ namespace HostedDatabaseOperator.Entities
         public int Port { get; init; }
 
         /// <summary>
+        /// The SSL mode for the connection. Defaults to Disabled.
+        /// Can be one of "Disabled" and "Required".
+        /// </summary>
+        public SslMode SslMode { get; set; } = SslMode.Disabled;
+
+        /// <summary>
         /// A reference to a secret that contains a username and a password to connect to the database host.
         /// </summary>
         [Required]

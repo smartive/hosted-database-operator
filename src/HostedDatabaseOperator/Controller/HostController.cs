@@ -102,7 +102,7 @@ namespace HostedDatabaseOperator.Controller
             var user = secret.ReadData(spec.UsernameKey);
             var pass = secret.ReadData(spec.PasswordKey);
 
-            _pool.Add(host.Name(), new(spec.Type, spec.Host, Convert.ToInt16(spec.Port), user, pass));
+            _pool.Add(host.Name(), new(spec.Type, spec.Host, Convert.ToInt16(spec.Port), spec.SslMode, user, pass));
 
             _logger.LogInformation(
                 @"Cluster database host ""{name}"" was modified. Updated connection.",

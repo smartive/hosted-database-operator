@@ -20,10 +20,10 @@ using Microsoft.Extensions.Logging;
 namespace HostedDatabaseOperator.Controller
 {
     [EntityRbac(typeof(V1Secret), Verbs = RbacVerb.Get | RbacVerb.Create | RbacVerb.Update)]
-    [EntityRbac(typeof(DanglingDatabase), Verbs = RbacVerb.List | RbacVerb.Update | RbacVerb.Delete)]
+    [EntityRbac(typeof(DanglingDatabase), Verbs = RbacVerb.List | RbacVerb.Update | RbacVerb.Delete | RbacVerb.Watch)]
     [EntityRbac(typeof(HostedDatabase), Verbs = RbacVerb.Update | RbacVerb.Watch)]
     [EntityRbac(typeof(Corev1Event), Verbs = RbacVerb.Create)]
-    public class DatabaseController : IResourceController<HostedDatabase>
+    public class DatabaseController : IResourceController<HostedDatabase>, IResourceController<DanglingDatabase>
     {
         private readonly ILogger<DatabaseController> _logger;
         private readonly IKubernetesClient _client;
@@ -61,9 +61,11 @@ namespace HostedDatabaseOperator.Controller
             switch (entity.Spec.OnDelete)
             {
                 case DatabaseOnDeleteAction.DeleteDatabase:
+                    await _hostedFinalizer.RemoveFinalizerAsync<SoftDeleteDatabaseFinalizer>(entity);
                     await _hostedFinalizer.RegisterFinalizerAsync<DeleteDatabaseFinalizer>(entity);
                     break;
                 case DatabaseOnDeleteAction.CreateDanglingDatabase:
+                    await _hostedFinalizer.RemoveFinalizerAsync<DeleteDatabaseFinalizer>(entity);
                     await _hostedFinalizer.RegisterFinalizerAsync<SoftDeleteDatabaseFinalizer>(entity);
                     break;
             }

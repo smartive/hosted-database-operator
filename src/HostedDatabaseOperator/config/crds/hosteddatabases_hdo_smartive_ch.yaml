@@ -35,6 +35,7 @@ spec:
       openAPIV3Schema:
         properties:
           status:
+            description: Status object for the entity.
             properties:
               dbName:
                 description: >-
@@ -54,6 +55,7 @@ spec:
                 type: object
             type: object
           spec:
+            description: Specification of the kubernetes object.
             properties:
               host:
                 description: >-

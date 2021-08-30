@@ -47,7 +47,6 @@ namespace HostedDatabaseOperator.Finalizer
                 Metadata =
                 {
                     Name = entity.Name(),
-                    NamespaceProperty = entity.Namespace(),
                     Labels = new Dictionary<string, string>
                     {
                         { "managed-by", _settings.Name },

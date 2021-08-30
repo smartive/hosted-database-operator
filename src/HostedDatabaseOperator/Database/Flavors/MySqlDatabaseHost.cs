@@ -58,6 +58,7 @@ namespace HostedDatabaseOperator.Database.Flavors
         public string ConnectionString(string? databaseName = null) =>
             $"server={ConnectionConfiguration.Host};port={ConnectionConfiguration.Port};" +
             $"user={ConnectionConfiguration.Username};password={ConnectionConfiguration.Password};" +
+            $"SslMode=${(ConnectionConfiguration.SslMode == SslMode.Disabled ? "None" : "Required")}" +
             $"{(string.IsNullOrWhiteSpace(databaseName) ? string.Empty : $"database={databaseName};")}";
 
         public string FormatDatabaseName(string name)
