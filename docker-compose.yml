@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: pass
   mysql:
     container_name: hdo-mysql-host
-    image: mysql:5.7.14
+    image: mysql:5.7.44
     ports:
       - 3306:3306
     environment:
